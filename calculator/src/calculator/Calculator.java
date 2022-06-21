@@ -23,6 +23,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import java.awt.font.*;
 
 
 public class Calculator extends Application{
@@ -46,7 +49,12 @@ public class Calculator extends Application{
     Button save = new Button("Save");
     Button load = new Button("Load");
     
-    //create gridpanes
+ 
+   String fSize = "-fx-font: 24 garamond;";
+   
+//   Font font1 = new Font("Garamond", Font.BOLD,20); 
+
+//create gridpanes
     
     GridPane overallPane = new GridPane();
     GridPane buttonPane = new GridPane();
@@ -54,10 +62,63 @@ public class Calculator extends Application{
     
   @Override
   public void start(Stage primaryStage) throws IOException{
-        
-      buttonPane.setPadding(new Insets(10, 10, 10, 10));
-      buttonPane.setHgap(5);
       
+      buttonPane.setHgap(0);
+      buttonPane.setVgap(0);
+      buttonPane.setPadding(new Insets(10, 10, 10, 10));
+   
+
+      number1.setPrefHeight(50.0);
+      number1.setPrefWidth(50.0);
+      number1.setStyle(fSize);
+      number2.setPrefHeight(50.0);
+      number2.setPrefWidth(50.0);
+      number2.setStyle(fSize);
+      number3.setPrefHeight(50.0);
+      number3.setPrefWidth(50.0);
+      number3.setStyle(fSize);
+      number4.setPrefHeight(50.0);
+      number4.setPrefWidth(50.0);
+      number4.setStyle(fSize);
+      number5.setPrefHeight(50.0);
+      number5.setPrefWidth(50.0);
+      number5.setStyle(fSize);
+      number6.setPrefHeight(50.0);
+      number6.setPrefWidth(50.0);
+      number6.setStyle(fSize);
+      number7.setPrefHeight(50.0);
+      number7.setPrefWidth(50.0);
+      number7.setStyle(fSize);
+      number8.setPrefHeight(50.0);
+      number8.setPrefWidth(50.0);
+      number8.setStyle(fSize);
+      number9.setPrefHeight(50.0);
+      number9.setPrefWidth(50.0);
+      number9.setStyle(fSize);
+      number0.setPrefHeight(50.0);
+      number0.setPrefWidth(50.0);
+      number0.setStyle(fSize);
+      plusSign.setPrefHeight(50.0);
+      plusSign.setPrefWidth(50.0);
+      plusSign.setStyle(fSize);
+      minusSign.setPrefHeight(50.0);
+      minusSign.setPrefWidth(50.0);
+      minusSign.setStyle(fSize);
+      division.setPrefHeight(50.0);
+      division.setPrefWidth(50.0);
+      division.setStyle(fSize);
+      multi.setPrefHeight(50.0);
+      multi.setPrefWidth(50.0);
+      multi.setStyle(fSize);
+      equals.setPrefHeight(50.0);
+      equals.setPrefWidth(50.0);
+      equals.setStyle(fSize);
+      
+     
+     
+     
+     
+     
      
       buttonPane.add(number1, 0, 0);
       buttonPane.add(number2, 1, 0);
@@ -74,7 +135,8 @@ public class Calculator extends Application{
       buttonPane.add(division, 4, 2);
       buttonPane.add(multi, 4, 3);
       buttonPane.add(equals, 2, 3);
-      
+//      buttonPane.add(save, 5,3);
+//      buttonPane.add(load, 6, 3);
       overallPane.add(buttonPane, 0, 0);
       
       
