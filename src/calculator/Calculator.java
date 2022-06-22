@@ -23,9 +23,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Maxine Knight, Zachary Taylor
- * Homework 4, CIS 484
- * Additional functions: Order of operations, delete and clear, decimal
+ * Maxine Knight, Zachary Taylor 
+ * Homework 4, CIS 484 
+ * Additional functions: Order of operations, delete (one character at a time) and clear, decimal
  */
 public class Calculator extends Application {
 
@@ -45,7 +45,7 @@ public class Calculator extends Application {
     Button division = new Button("/");
     Button multi = new Button("*");
     Button equals = new Button("=");
-    Button delete = new Button("<- Del");
+    Button delete = new Button("<-- Del");
     Button clear = new Button("Clear");
     Button decimal = new Button(".");
     TextField calc = new TextField(); // Stores calculation
@@ -62,13 +62,18 @@ public class Calculator extends Application {
     GridPane tickerPane = new GridPane();
     GridPane delClear = new GridPane();
 
+    // Create stacks and ListView
     Stack opStack = new Stack();
     Stack<Double> numStack = new Stack<>();
     ListView<String> calculationList = new ListView<>();
 
+    // Create file variables
     private FileInputStream readFile;
     private ObjectInputStream readCalculatorData;
 
+    /****************************
+     * Start method
+     * *************************/
     @Override
     public void start(Stage primaryStage) throws IOException {
 
@@ -88,101 +93,15 @@ public class Calculator extends Application {
             System.out.println(e);
         }
 
+        // Set TextField for calculation to not editable
         calc.setEditable(false);
         calc.setDisable(false);
-
-        buttonPane.setHgap(0);
-        buttonPane.setVgap(0);
-        buttonPane.setPadding(new Insets(10, 10, 10, 10));
-
-        // Increase size of all buttons
-        number1.setPrefHeight(50.0);
-        number1.setPrefWidth(50.0);
-        number1.setStyle(fSize);
-        number2.setPrefHeight(50.0);
-        number2.setPrefWidth(50.0);
-        number2.setStyle(fSize);
-        number3.setPrefHeight(50.0);
-        number3.setPrefWidth(50.0);
-        number3.setStyle(fSize);
-        number4.setPrefHeight(50.0);
-        number4.setPrefWidth(50.0);
-        number4.setStyle(fSize);
-        number5.setPrefHeight(50.0);
-        number5.setPrefWidth(50.0);
-        number5.setStyle(fSize);
-        number6.setPrefHeight(50.0);
-        number6.setPrefWidth(50.0);
-        number6.setStyle(fSize);
-        number7.setPrefHeight(50.0);
-        number7.setPrefWidth(50.0);
-        number7.setStyle(fSize);
-        number8.setPrefHeight(50.0);
-        number8.setPrefWidth(50.0);
-        number8.setStyle(fSize);
-        number9.setPrefHeight(50.0);
-        number9.setPrefWidth(50.0);
-        number9.setStyle(fSize);
-        number0.setPrefHeight(50.0);
-        number0.setPrefWidth(50.0);
-        number0.setStyle(fSize);
-        plusSign.setPrefHeight(50.0);
-        plusSign.setPrefWidth(50.0);
-        plusSign.setStyle(fSize);
-        minusSign.setPrefHeight(50.0);
-        minusSign.setPrefWidth(50.0);
-        minusSign.setStyle(fSize);
-        division.setPrefHeight(50.0);
-        division.setPrefWidth(50.0);
-        division.setStyle(fSize);
-        multi.setPrefHeight(50.0);
-        multi.setPrefWidth(50.0);
-        multi.setStyle(fSize);
-        equals.setPrefHeight(50.0);
-        equals.setPrefWidth(50.0);
-        equals.setStyle(fSize);
-        decimal.setPrefHeight(50.0);
-        decimal.setPrefWidth(50.0);
-        decimal.setStyle(fSize);
-        clear.setPrefHeight(50.0);
-        clear.setPrefWidth(50.0);
-        clear.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        delete.setPrefHeight(50.0);
-        delete.setPrefWidth(50.0);
-        delete.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        // Set numbers to button pane
-        buttonPane.add(calc, 0, 0, 4, 1);
-        buttonPane.add(number1, 0, 1);
-        buttonPane.add(number2, 1, 1);
-        buttonPane.add(number3, 2, 1);
-        buttonPane.add(number4, 0, 2);
-        buttonPane.add(number5, 1, 2);
-        buttonPane.add(number6, 2, 2);
-        buttonPane.add(number7, 0, 3);
-        buttonPane.add(number8, 1, 3);
-        buttonPane.add(number9, 2, 3);
-        buttonPane.add(number0, 1, 4);
-        buttonPane.add(decimal, 0, 4);
-        buttonPane.add(plusSign, 3, 1);
-        buttonPane.add(minusSign, 3, 2);
-        buttonPane.add(division, 3, 3);
-        buttonPane.add(multi, 3, 4);
-        buttonPane.add(equals, 2, 4);
-        buttonPane.add(clear, 0, 6, 2, 1);
-        buttonPane.add(delete, 2, 6, 3, 1);
-
-        calculationList.setMinWidth(280);
-
-        // Right side ticker pane
-        tickerPane.add(message, 0, 0);
-        tickerPane.add(calculationList, 0, 1);
-        delClear.add(save, 0, 1);
-        delClear.add(load, 0, 3);
-
-        overallPane.add(tickerPane, 1, 0, 1, 2);
-        overallPane.add(delClear, 2, 0);
-        overallPane.add(buttonPane, 0, 0);
+        
+        // Call method to increase size of all buttons
+        setButtonSize();
+        
+        // Call method to set the Buttons to the GridPanes
+        setButtonsAndPane();
 
         primaryStage = new Stage();
         Scene primaryScene = new Scene(overallPane, 580, 450);
@@ -203,27 +122,29 @@ public class Calculator extends Application {
         number0.setOnAction(e -> addNumToScreen(number0.getText()));
         decimal.setOnAction(e -> addNumToScreen(decimal.getText()));
 
+        // Calls the addOpToScreen method for operators
         plusSign.setOnAction(e -> addOpToScreen(plusSign.getText()));
         minusSign.setOnAction(e -> addOpToScreen(minusSign.getText()));
         division.setOnAction(e -> addOpToScreen(division.getText()));
         multi.setOnAction(e -> addOpToScreen(multi.getText()));
 
+        // Equals calls the calculate method
         equals.setOnAction(e -> calculate(calc.getText()));
 
+        // Clear button clears the calculation TextField
         clear.setOnAction(e -> calc.clear());
 
+        // Delete button deletes one character at a time
         delete.setOnAction(e -> {
             int size = calc.getText().length();
-            if (size != 0) {
+            if (size != 0) { // Make sure TextField isn't empty
                 calc.deleteText(size - 1, size);
             }
         });
 
-        /**
-         * ******************************************************
-         * Save data from listView to file
-         * ******************************************************
-         */
+        /*************************************************
+         * Save button --> Save data from ListView to file
+         * **********************************************/
         save.setOnAction(e -> { // On save select, save listView to file
             try {
                 FileOutputStream output = new FileOutputStream("calculatorData.dat");
@@ -241,9 +162,9 @@ public class Calculator extends Application {
         });
 
         /**
-         * ******************************************************
-         * Load data from file
-         * ******************************************************
+         * **********************************
+         * Load button --> Load data from file
+         * ***********************************
          */
         load.setOnAction(e -> {
             try { // For to-do listView
@@ -253,10 +174,8 @@ public class Calculator extends Application {
                 }
             } catch (EOFException ee) {
 
-            } catch (IOException ex) {
-                Logger.getLogger(Calculator.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(Calculator.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException | ClassNotFoundException ex) {
+                System.out.println(ex);
             }
             message.setText("Load successful.");
         });
@@ -340,6 +259,102 @@ public class Calculator extends Application {
         } catch (Exception e) {
             message.setText("Error. Please revise your equation."); // Send message to user to revise equation
         }
+    }
+    
+    public void setButtonSize() {
+        number1.setPrefHeight(50.0);
+        number1.setPrefWidth(50.0);
+        number1.setStyle(fSize);
+        number2.setPrefHeight(50.0);
+        number2.setPrefWidth(50.0);
+        number2.setStyle(fSize);
+        number3.setPrefHeight(50.0);
+        number3.setPrefWidth(50.0);
+        number3.setStyle(fSize);
+        number4.setPrefHeight(50.0);
+        number4.setPrefWidth(50.0);
+        number4.setStyle(fSize);
+        number5.setPrefHeight(50.0);
+        number5.setPrefWidth(50.0);
+        number5.setStyle(fSize);
+        number6.setPrefHeight(50.0);
+        number6.setPrefWidth(50.0);
+        number6.setStyle(fSize);
+        number7.setPrefHeight(50.0);
+        number7.setPrefWidth(50.0);
+        number7.setStyle(fSize);
+        number8.setPrefHeight(50.0);
+        number8.setPrefWidth(50.0);
+        number8.setStyle(fSize);
+        number9.setPrefHeight(50.0);
+        number9.setPrefWidth(50.0);
+        number9.setStyle(fSize);
+        number0.setPrefHeight(50.0);
+        number0.setPrefWidth(50.0);
+        number0.setStyle(fSize);
+        plusSign.setPrefHeight(50.0);
+        plusSign.setPrefWidth(50.0);
+        plusSign.setStyle(fSize);
+        minusSign.setPrefHeight(50.0);
+        minusSign.setPrefWidth(50.0);
+        minusSign.setStyle(fSize);
+        division.setPrefHeight(50.0);
+        division.setPrefWidth(50.0);
+        division.setStyle(fSize);
+        multi.setPrefHeight(50.0);
+        multi.setPrefWidth(50.0);
+        multi.setStyle(fSize);
+        equals.setPrefHeight(50.0);
+        equals.setPrefWidth(50.0);
+        equals.setStyle(fSize);
+        decimal.setPrefHeight(50.0);
+        decimal.setPrefWidth(50.0);
+        decimal.setStyle(fSize);
+        clear.setPrefHeight(50.0);
+        clear.setPrefWidth(50.0);
+        clear.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        delete.setPrefHeight(50.0);
+        delete.setPrefWidth(50.0);
+        delete.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    }
+    
+    public void setButtonsAndPane() {
+        buttonPane.setHgap(0);
+        buttonPane.setVgap(0);
+        buttonPane.setPadding(new Insets(10, 10, 10, 10));
+        
+        // Set numbers to button pane
+        buttonPane.add(calc, 0, 0, 4, 1);
+        buttonPane.add(number1, 0, 1);
+        buttonPane.add(number2, 1, 1);
+        buttonPane.add(number3, 2, 1);
+        buttonPane.add(number4, 0, 2);
+        buttonPane.add(number5, 1, 2);
+        buttonPane.add(number6, 2, 2);
+        buttonPane.add(number7, 0, 3);
+        buttonPane.add(number8, 1, 3);
+        buttonPane.add(number9, 2, 3);
+        buttonPane.add(number0, 1, 4);
+        buttonPane.add(decimal, 0, 4);
+        buttonPane.add(plusSign, 3, 1);
+        buttonPane.add(minusSign, 3, 2);
+        buttonPane.add(division, 3, 3);
+        buttonPane.add(multi, 3, 4);
+        buttonPane.add(equals, 2, 4);
+        buttonPane.add(clear, 0, 6, 2, 1);
+        buttonPane.add(delete, 2, 6, 3, 1);
+
+        calculationList.setMinWidth(280);
+
+        // Right side ticker pane
+        tickerPane.add(message, 0, 0);
+        tickerPane.add(calculationList, 0, 1);
+        delClear.add(save, 0, 1);
+        delClear.add(load, 0, 3);
+
+        overallPane.add(tickerPane, 1, 0, 1, 2);
+        overallPane.add(delClear, 2, 0);
+        overallPane.add(buttonPane, 0, 0);
     }
 
     public boolean doesFileExist(File file) { // Checks if file exists
