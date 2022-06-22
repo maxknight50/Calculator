@@ -10,10 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -22,7 +19,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import java.awt.font.*;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Maxine Knight, Zachary Taylor
+ * Homework 4, CIS 484
+ * Additional functions: Order of operations, delete and clear, decimal
+ */
 public class Calculator extends Application {
 
     // create buttons
@@ -41,26 +45,49 @@ public class Calculator extends Application {
     Button division = new Button("/");
     Button multi = new Button("*");
     Button equals = new Button("=");
-    TextField calc = new TextField();
+    Button delete = new Button("<- Del");
+    Button clear = new Button("Clear");
+    Button decimal = new Button(".");
+    TextField calc = new TextField(); // Stores calculation
 
-    TextField temp = new TextField();
+    Label message = new Label("Welcome!");
     Button save = new Button("Save");
     Button load = new Button("Load");
 
     String fSize = "-fx-font: 24 garamond;";
 
-//   Font font1 = new Font("Garamond", Font.BOLD,20); 
-//create gridpanes
+    //create gridpanes
     GridPane overallPane = new GridPane();
     GridPane buttonPane = new GridPane();
-    GridPane calculation = new GridPane();
     GridPane tickerPane = new GridPane();
+    GridPane delClear = new GridPane();
 
     Stack opStack = new Stack();
     Stack<Double> numStack = new Stack<>();
+    ListView<String> calculationList = new ListView<>();
+
+    private FileInputStream readFile;
+    private ObjectInputStream readCalculatorData;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+
+        // File identification
+        try {
+            String filePath1 = "calculatorData.dat";
+            File calcFile = new File(filePath1);
+
+            if (doesFileExist(calcFile) == false) { // If file does not exits, create
+                System.out.println("File 1 created: " + calcFile.createNewFile());
+            } else {
+                System.out.println("File 1 exists"); // If file exists, create ObjectInputStream
+                this.readFile = new FileInputStream("calculatorData.dat");
+                this.readCalculatorData = new ObjectInputStream(readFile);
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
         calc.setEditable(false);
         calc.setDisable(false);
 
@@ -68,6 +95,7 @@ public class Calculator extends Application {
         buttonPane.setVgap(0);
         buttonPane.setPadding(new Insets(10, 10, 10, 10));
 
+        // Increase size of all buttons
         number1.setPrefHeight(50.0);
         number1.setPrefWidth(50.0);
         number1.setStyle(fSize);
@@ -113,62 +141,140 @@ public class Calculator extends Application {
         equals.setPrefHeight(50.0);
         equals.setPrefWidth(50.0);
         equals.setStyle(fSize);
+        decimal.setPrefHeight(50.0);
+        decimal.setPrefWidth(50.0);
+        decimal.setStyle(fSize);
+        clear.setPrefHeight(50.0);
+        clear.setPrefWidth(50.0);
+        clear.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        delete.setPrefHeight(50.0);
+        delete.setPrefWidth(50.0);
+        delete.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-        buttonPane.add(number1, 0, 0);
-        buttonPane.add(number2, 1, 0);
-        buttonPane.add(number3, 2, 0);
-        buttonPane.add(number4, 0, 1);
-        buttonPane.add(number5, 1, 1);
-        buttonPane.add(number6, 2, 1);
-        buttonPane.add(number7, 0, 2);
-        buttonPane.add(number8, 1, 2);
-        buttonPane.add(number9, 2, 2);
-        buttonPane.add(number0, 1, 3);
-        buttonPane.add(plusSign, 4, 0);
-        buttonPane.add(minusSign, 4, 1);
-        buttonPane.add(division, 4, 2);
-        buttonPane.add(multi, 4, 3);
-        buttonPane.add(equals, 2, 3);
+        // Set numbers to button pane
+        buttonPane.add(calc, 0, 0, 4, 1);
+        buttonPane.add(number1, 0, 1);
+        buttonPane.add(number2, 1, 1);
+        buttonPane.add(number3, 2, 1);
+        buttonPane.add(number4, 0, 2);
+        buttonPane.add(number5, 1, 2);
+        buttonPane.add(number6, 2, 2);
+        buttonPane.add(number7, 0, 3);
+        buttonPane.add(number8, 1, 3);
+        buttonPane.add(number9, 2, 3);
+        buttonPane.add(number0, 1, 4);
+        buttonPane.add(decimal, 0, 4);
+        buttonPane.add(plusSign, 3, 1);
+        buttonPane.add(minusSign, 3, 2);
+        buttonPane.add(division, 3, 3);
+        buttonPane.add(multi, 3, 4);
+        buttonPane.add(equals, 2, 4);
+        buttonPane.add(clear, 0, 6, 2, 1);
+        buttonPane.add(delete, 2, 6, 3, 1);
 
-        calculation.add(calc, 0, 0);
+        calculationList.setMinWidth(280);
 
-        tickerPane.add(save, 0, 1);
-        tickerPane.add(load, 1, 1);
+        // Right side ticker pane
+        tickerPane.add(message, 0, 0);
+        tickerPane.add(calculationList, 0, 1);
+        delClear.add(save, 0, 1);
+        delClear.add(load, 0, 3);
 
-        overallPane.add(calculation, 0, 0);
-        overallPane.add(tickerPane, 1, 0);
-        overallPane.add(buttonPane, 0, 1);
+        overallPane.add(tickerPane, 1, 0, 1, 2);
+        overallPane.add(delClear, 2, 0);
+        overallPane.add(buttonPane, 0, 0);
 
         primaryStage = new Stage();
-        Scene primaryScene = new Scene(overallPane, 550, 400);
+        Scene primaryScene = new Scene(overallPane, 580, 450);
         primaryStage.setScene(primaryScene);
         primaryStage.setTitle("DukeCalc v 0.1");
         primaryStage.show();
 
-        // Calls the addToScreen method in order to display the numbers and operators
-        number1.setOnAction(e -> addToScreen(number1.getText()));
-        number2.setOnAction(e -> addToScreen(number2.getText()));
-        number3.setOnAction(e -> addToScreen(number3.getText()));
-        number4.setOnAction(e -> addToScreen(number4.getText()));
-        number5.setOnAction(e -> addToScreen(number5.getText()));
-        number6.setOnAction(e -> addToScreen(number6.getText()));
-        number7.setOnAction(e -> addToScreen(number7.getText()));
-        number8.setOnAction(e -> addToScreen(number8.getText()));
-        number9.setOnAction(e -> addToScreen(number9.getText()));
-        number0.setOnAction(e -> addToScreen(number0.getText()));
+        // Calls the addToScreen method in order to display the numbers and operators when selected
+        number1.setOnAction(e -> addNumToScreen(number1.getText()));
+        number2.setOnAction(e -> addNumToScreen(number2.getText()));
+        number3.setOnAction(e -> addNumToScreen(number3.getText()));
+        number4.setOnAction(e -> addNumToScreen(number4.getText()));
+        number5.setOnAction(e -> addNumToScreen(number5.getText()));
+        number6.setOnAction(e -> addNumToScreen(number6.getText()));
+        number7.setOnAction(e -> addNumToScreen(number7.getText()));
+        number8.setOnAction(e -> addNumToScreen(number8.getText()));
+        number9.setOnAction(e -> addNumToScreen(number9.getText()));
+        number0.setOnAction(e -> addNumToScreen(number0.getText()));
+        decimal.setOnAction(e -> addNumToScreen(decimal.getText()));
 
-        plusSign.setOnAction(e -> addToScreen(" " + plusSign.getText() + " "));
-        minusSign.setOnAction(e -> addToScreen(" " + minusSign.getText() + " "));
-        division.setOnAction(e -> addToScreen(" " + division.getText() + " "));
-        multi.setOnAction(e -> addToScreen(" " + multi.getText() + " "));
+        plusSign.setOnAction(e -> addOpToScreen(plusSign.getText()));
+        minusSign.setOnAction(e -> addOpToScreen(minusSign.getText()));
+        division.setOnAction(e -> addOpToScreen(division.getText()));
+        multi.setOnAction(e -> addOpToScreen(multi.getText()));
 
         equals.setOnAction(e -> calculate(calc.getText()));
+
+        clear.setOnAction(e -> calc.clear());
+
+        delete.setOnAction(e -> {
+            int size = calc.getText().length();
+            if (size != 0) {
+                calc.deleteText(size - 1, size);
+            }
+        });
+
+        /**
+         * ******************************************************
+         * Save data from listView to file
+         * ******************************************************
+         */
+        save.setOnAction(e -> { // On save select, save listView to file
+            try {
+                FileOutputStream output = new FileOutputStream("calculatorData.dat");
+                ObjectOutputStream objectOutput = new ObjectOutputStream(output); // Create OutputStream for passed in file
+
+                for (int i = 0; i < calculationList.getItems().size(); i++) { // Loop through all objects in the list
+                    objectOutput.writeObject(calculationList.getItems().get(i)); // Write the object to the file
+                }
+                objectOutput.close();
+
+            } catch (IOException ex) {
+                System.out.println(ex);
+            }
+            message.setText("Save successful.");
+        });
+
+        /**
+         * ******************************************************
+         * Load data from file
+         * ******************************************************
+         */
+        load.setOnAction(e -> {
+            try { // For to-do listView
+                while (true) {
+                    String calcData = (String) readCalculatorData.readObject(); // Read the object from the file
+                    calculationList.getItems().add(calcData); // Add it to the listView
+                }
+            } catch (EOFException ee) {
+
+            } catch (IOException ex) {
+                Logger.getLogger(Calculator.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Calculator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            message.setText("Load successful.");
+        });
     }
 
-    public void addToScreen(String toDisplay) {
+    public void addNumToScreen(String toDisplay) { // Adds the number to the text field
         calc.appendText(toDisplay);
     }
 
+    public void addOpToScreen(String toDisplay) { // Add the operator to the text field with spaces
+        calc.appendText(" " + toDisplay + " ");
+    }
+
+    /**
+     * ******************************************************
+     * Method called when equals operator is selected
+     * ******************************************************
+     */
     public void calculate(String calculation) {
         int result = 0;
         try {
@@ -180,12 +286,6 @@ public class Calculator extends Application {
                     numStack.push(Double.parseDouble(a)); // Push onto number stack
                 }
             }
-            // 3 + 5 / 1 * 4
-            // Op stack: * / + 
-            // Num stack: 3 (5 1) 4
-            // / at 1
-            // 5 at 1, 1 at 2
-            // 5 removed, 1 at 1
 
             double num = 0;
             double firstNum = 0;
@@ -200,20 +300,17 @@ public class Calculator extends Application {
 
                         if (opStack.get(i).equals("/")) {
                             num = firstNum / secondNum; // Perform calculation
-                            System.out.println(firstNum + " / " + secondNum + " = " + num);
                             numStack.add(i, num); // Add the calculated number back to the stack
                         } else if (opStack.get(i).equals("*")) {
                             num = firstNum * secondNum;
-                            System.out.println(firstNum + " * " + secondNum + " = " + num);
                             numStack.add(i, num);
                         }
                         opStack.remove(i); // Once completed, remove the operator from the stack
-                        i -= 1;
-
+                        i -= 1; // Since an item was removed from the stack, decrease i
                     }
                 }
                 for (int i = 0; i < opStack.size(); i++) { // Addition/Subtraction specific loop
-                    if (opStack.get(i).equals("+") || opStack.get(i).equals("-")) { 
+                    if (opStack.get(i).equals("+") || opStack.get(i).equals("-")) {
                         firstNum = numStack.elementAt(i); // Get the number located before the operator
                         secondNum = numStack.elementAt(i + 1); // Get the number located after the operator
                         numStack.removeElementAt(i); // Remove first number
@@ -221,48 +318,32 @@ public class Calculator extends Application {
 
                         if (opStack.get(i).equals("+")) {
                             num = firstNum + secondNum;
-                            System.out.println(firstNum + " + " + secondNum + " = " + num);
                             numStack.add(i, num);
                         } else if (opStack.get(i).equals("-")) {
                             num = firstNum - secondNum;
-                            System.out.println(firstNum + " - " + secondNum + " = " + num);
                             numStack.add(i, num);
                         }
                         opStack.remove(i);
                         i -= 1;
                     }
                 }
-
-                System.out.println("Final result: " + numStack.get(0));
+                message.setText(""); // Set message back to blank
+                if (numStack.get(0) % 1 != 0) { // Remainder would not be zero, so decimal
+                    calculationList.getItems().add(calc.getText() + " = " + numStack.get(0)); // Add calculation and answer to list
+                } else {
+                    calculationList.getItems().add(calc.getText() + " = " + numStack.get(0).intValue());
+                }
                 numStack.clear();
                 opStack.clear();
                 calc.clear();
-
-//                int topNum = numStack.pop();
-//                int botNum = numStack.pop();
-//                String operator = opStack.pop().toString();
-//                System.out.println(topNum + " " + operator + " " + botNum);
-//                switch (operator) {
-//                    case "+":
-//                        result = topNum + botNum;
-//                        break;
-//                    case "-":
-//                        result = topNum - botNum;
-//                        break;
-//                    case "*":
-//                        result = topNum * botNum;
-//                        break;
-//                    case "/":
-//                        result = topNum / botNum;
-//                        break;
-//                }
-//                numStack.push(result);
             }
-
-            // Second stack object for symbols
         } catch (Exception e) {
-            System.out.println(e);
+            message.setText("Error. Please revise your equation."); // Send message to user to revise equation
         }
+    }
+
+    public boolean doesFileExist(File file) { // Checks if file exists
+        return file.exists();
     }
 
     public static void main(String[] args) {
