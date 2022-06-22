@@ -8,19 +8,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import java.awt.font.*;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * Maxine Knight, Zachary Taylor 
